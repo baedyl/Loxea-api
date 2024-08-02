@@ -17,6 +17,10 @@ from app.config.response import HTTPErrorResponse
 from app.config.response import HTTPException
 from app.db.database import create_db_and_tables
 
+from app.controller.back_office import router as bo_router
+from app.controller.client import router as client_router
+
+
 create_db_and_tables()
 
 
@@ -24,6 +28,18 @@ def create_app():
     main_app = FastAPI(title=config.SERVER_NAME)
 
     dictConfig(LogConfig().model_dump())
+
+    # Static Folder
+    main_app.mount("/static", StaticFiles(directory="static"), name="static")
+    main_app.include_router(bo_router)
+    main_app.include_router(client_router)
+
+    # Route Context Configuration
+    main_app.add_middleware(
+        RawContextMiddleware,
+        plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
+    )
+    main_app.middleware("http")(catch_all_exception)
 
     # Cors Middleware Configuration
     main_app.add_middleware(
@@ -33,16 +49,6 @@ def create_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    # Static Folder
-    main_app.mount("/static", StaticFiles(directory="static"), name="static")
-
-    # Route Context Configuration
-    main_app.add_middleware(
-        RawContextMiddleware,
-        plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
-    )
-    main_app.middleware("http")(catch_all_exception)
 
     # Endpoints
 

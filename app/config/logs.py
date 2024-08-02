@@ -1,8 +1,7 @@
 from typing import Any
-
-from pydantic import BaseModel
-from pydantic import Field
-
+from pydantic import BaseModel, Field
+import os
+from logging.handlers import RotatingFileHandler
 from app.config.config import base_dir
 
 
@@ -42,9 +41,11 @@ class LogConfig(BaseModel):
             },
             "file": {
                 "level": "WARNING",
-                "class": "logging.FileHandler",
+                "class": "logging.handlers.RotatingFileHandler",
                 "formatter": "default",
                 "filename": f"{base_dir}/app/logs/server.log",
+                "maxBytes": 10485760,  # 10 MB
+                "backupCount": 5,
             },
         }
     )
@@ -52,3 +53,9 @@ class LogConfig(BaseModel):
     loggers: dict[str, Any] = Field(
         {"server": {"handlers": ["console", "file"], "level": LOG_LEVEL}}
     )
+
+
+# Ensure the log directory exists
+log_directory = f"{base_dir}/app/logs"
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
