@@ -1,7 +1,9 @@
-from typing import Any
-from pydantic import BaseModel, Field
 import os
-from logging.handlers import RotatingFileHandler
+from typing import Any
+
+from pydantic import BaseModel
+from pydantic import Field
+
 from app.config.config import base_dir
 
 
