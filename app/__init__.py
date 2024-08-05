@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi import status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
@@ -41,6 +42,7 @@ def create_app():
     )
     main_app.middleware("http")(catch_all_exception)
 
+    main_app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
     # Cors Middleware Configuration
     main_app.add_middleware(
         CORSMiddleware,
