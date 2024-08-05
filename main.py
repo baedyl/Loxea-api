@@ -5,6 +5,7 @@ from fastapi import Request
 from app import create_app
 from app.config.config import config
 from app.db.database import create_db_and_tables
+from app.data.models import User 
 
 create_db_and_tables()
 
