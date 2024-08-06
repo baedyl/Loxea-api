@@ -1,16 +1,7 @@
 from typing import List, Optional
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
 from app.db.base import Base
 
-class IdentificationDetailsUserLink(SQLModel, table=True):
-    __tablename__ = "identification_details_user_link"
-
-    user_id: Optional[int] = Field(
-        default=None, foreign_key="users.id", primary_key=True
-    )
-    identification_details_id: Optional[int] = Field(
-        default=None, foreign_key="identification_details.id", primary_key=True
-    )
 
 class EmergencyContact(Base, table=True):
     __tablename__ = "emergency_contacts"
@@ -22,14 +13,8 @@ class Faq(Base, table=True):
     __tablename__ = "faqs"
 
     question: str
-    answers: List["FaqAnswer"] = Relationship(back_populates="faq")
-
-class FaqAnswer(Base, table=True):
-    __tablename__ = "faq_answers"
-
     answer: str
-    faq_id: Optional[int] = Field(default=None, foreign_key="faqs.id")
-    faq: Optional[Faq] = Relationship(back_populates="answers")
+
 
 class IdentificationDetails(Base, table=True):
     __tablename__ = "identification_details"
@@ -37,7 +22,7 @@ class IdentificationDetails(Base, table=True):
     chassis_number: str = Field(index=True, unique=False)
     plate_number: str = Field(index=True, unique=False)
     type: str
-    users: List["User"] = Relationship(back_populates="identification_details", link_model=IdentificationDetailsUserLink)
+
 
 class User(Base, table=True):
     __tablename__ = "users"
@@ -46,11 +31,13 @@ class User(Base, table=True):
     email: str = Field(index=True, unique=True)
     password: str
     code: str
+    is_admin: Optional[bool] = False
     profile_image_url: Optional[str] = None
-
-    identification_details: List[IdentificationDetails] = Relationship(back_populates="users", link_model=IdentificationDetailsUserLink)
+    chassis_number: Optional[str] = None
+    plate_number: Optional[str] = None
     feedbacks: List["Feedback"] = Relationship(back_populates="user")
     assistances: List["Assistance"] = Relationship(back_populates="user")
+
 
 class Feedback(Base, table=True):
     __tablename__ = "feedbacks"
@@ -58,6 +45,7 @@ class Feedback(Base, table=True):
     user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     message: str
     user: Optional[User] = Relationship(back_populates="feedbacks")
+
 
 class Assistance(Base, table=True):
     __tablename__ = "assistances"
@@ -70,6 +58,7 @@ class Assistance(Base, table=True):
     type: str
     user: Optional[User] = Relationship(back_populates="assistances")
     images: List["AssistanceImage"] = Relationship(back_populates="assistance")
+
 
 class AssistanceImage(Base, table=True):
     __tablename__ = "assistance_images"
