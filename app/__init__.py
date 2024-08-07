@@ -15,6 +15,7 @@ from app.config.http import validation_error
 from app.config.logs import LogConfig
 from app.config.response import HTTPErrorResponse
 from app.config.response import HTTPException
+from app.controller import client
 from app.controller.back_office import router as bo_router
 from app.controller.client import router as client_router
 from app.db.database import create_db_and_tables
@@ -49,6 +50,7 @@ def create_app():
     )
 
     # Endpoints
+    main_app.include_router(client.router)
 
     # Override Validation Error Response
     @main_app.exception_handler(RequestValidationError)
