@@ -6,11 +6,26 @@ class LoginSchema(BaseModel):
     password: str
 
 
+class LoginResponse(BaseModel):
+    name: str
+    email: str
+    access_token: str
+    refresh_token: str
+
+
 class SignUpSchema(BaseModel):
     name: str
     email: str
-    chassis: str
+    chassis_number: str
+    plate_number: str
     password: str
+
+
+class SignUpResponse(BaseModel):
+    name: str
+    email: str
+    access_token: str
+    refresh_token: str
 
 
 class RefreshTokenSchema(BaseModel):
@@ -23,6 +38,7 @@ class RequestPasswordResetSchema(BaseModel):
 
 class ValidateResetCodeSchema(BaseModel):
     code: str
+    email: str
 
 
 class ResetPasswordSchema(BaseModel):

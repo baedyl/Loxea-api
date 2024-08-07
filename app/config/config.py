@@ -15,7 +15,8 @@ class FactoryConfig(BaseSettings):
     SERVER_PORT: str
     SQLALCHEMY_DATABASE_URI: str
     SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 350 * 24 * 60  # 350 days expressed in minutes
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 24 * 60  # 1 day expressed in minutes
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 5 * 24 * 60  # 5 days expressed in minutes
     ENVIRONMENT: Literal["dev", "prod"]
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False

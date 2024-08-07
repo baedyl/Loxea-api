@@ -1,5 +1,9 @@
-from typing import List, Optional
-from sqlmodel import Field, Relationship
+from typing import List
+from typing import Optional
+
+from sqlmodel import Field
+from sqlmodel import Relationship
+
 from app.db.base import Base
 
 
@@ -8,6 +12,7 @@ class EmergencyContact(Base, table=True):
 
     name: str
     number: str
+
 
 class Faq(Base, table=True):
     __tablename__ = "faqs"
@@ -30,7 +35,7 @@ class User(Base, table=True):
     name: str
     email: str = Field(index=True, unique=True)
     password: str
-    code: str
+    code: Optional[str] = None
     is_admin: Optional[bool] = False
     profile_image_url: Optional[str] = None
     chassis_number: Optional[str] = None
