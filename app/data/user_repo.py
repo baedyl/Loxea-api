@@ -4,7 +4,7 @@ from abc import abstractmethod
 from sqlmodel import Session
 from sqlmodel import select
 
-from app.data.models import IdentificationDetails
+from app.data.models import IdentificationDetails, Token
 from app.data.models import User
 
 
@@ -19,7 +19,7 @@ class AbstractUserRepo(ABC):
     ): ...
 
     @abstractmethod
-    def create_user(self, email: str, name: str, password: str): ...
+    def create_user(self, email: str, name: str, password: bytes): ...
 
     @abstractmethod
     def get_user_from_ref_key(self, ref_key: str): ...
@@ -29,6 +29,12 @@ class AbstractUserRepo(ABC):
 
     @abstractmethod
     def change_user_password(self, new_password: str, email: str): ...
+
+    @abstractmethod
+    def get_tokens_from_ref_key(self, ref_key: str): ...
+
+    @abstractmethod
+    def save_tokens(self, subject: str, access_token: bytes, refresh_token: bytes): ...
 
 
 class UserRepo(AbstractUserRepo):
@@ -51,7 +57,7 @@ class UserRepo(AbstractUserRepo):
         record = self._session.exec(query).one_or_none()
         return dict(record) if record else None
 
-    def create_user(self, email: str, name: str, password: str) -> dict[str, str]:
+    def create_user(self, email: str, name: str, password: bytes) -> dict[str, str]:
         user = User(email=email, name=name, password=password)
         self._session.add(user)
         self._session.commit()
@@ -78,3 +84,24 @@ class UserRepo(AbstractUserRepo):
 
         self._session.add(record)
         self._session.commit()
+
+    def get_tokens_from_ref_key(self, ref_key: str) -> dict[str, str] | None:
+        record = self._session.exec(
+            select(Token).where(Token.subject == ref_key)
+        ).one_or_none()
+        return dict(record) if record else None
+
+    def save_tokens(self, subject: str, access_token: bytes, refresh_token: bytes):
+        record = self._session.exec(
+            select(Token).where(Token.subject == subject)
+        ).one_or_none()
+        if not record:
+            record = Token(subject=subject, access_token=access_token, refresh_token=refresh_token)
+        else:
+            record.access_token = access_token
+            record.refresh_token = refresh_token
+
+        self._session.add(record)
+        self._session.commit()
+
+

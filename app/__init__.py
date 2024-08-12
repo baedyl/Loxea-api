@@ -1,6 +1,6 @@
 from logging.config import dictConfig
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi import status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +18,10 @@ from app.config.response import HTTPException
 from app.controller import client
 from app.controller.back_office import router as bo_router
 from app.controller.client import router as client_router
+from app.controller.dependencies import get_user_repo
 from app.db.database import create_db_and_tables
+from app.db.session_hook import get_db
+from app.domain.authorization import AuthorizationMiddleware
 
 create_db_and_tables()
 
@@ -39,6 +42,9 @@ def create_app():
         plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
     )
     main_app.middleware("http")(catch_all_exception)
+
+    user_repo = get_user_repo(session=next(get_db()))
+    main_app.add_middleware(AuthorizationMiddleware, repo=user_repo)
 
     # Cors Middleware Configuration
     main_app.add_middleware(
