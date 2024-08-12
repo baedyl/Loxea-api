@@ -2,6 +2,8 @@ from abc import ABC
 from typing import Optional, List
 from google.cloud import storage
 from google.oauth2 import service_account
+from google.cloud.exceptions import GoogleCloudError
+
 
 from config.config import config
 
@@ -21,6 +23,16 @@ class StorageBase(ABC):
         """
         raise NotImplementedError("Subclasses must implement upload_file")
     
+
+    def upload_bytes(self, bucket_name: str, data: bytes, destination_blob_name: str) -> None:
+        """Uploads bytes to an objct storage bucket.
+
+        Args:
+            bucket_name: Name of the bucket.
+            data: Bytes to upload.
+            destination_blob_name: Name of the object in the bucket.
+        """
+         
     def generate_download_urls(self, bucket_name: str, prefix: str, expiration: int):
         """Generates signed URLs for objects in an object storage bucket.
 
@@ -80,6 +92,20 @@ class GCPStorage:
         blob = bucket.blob(destination_blob_name)
         blob.upload_from_filename(source_file_path)
 
+    def upload_bytes(self, bucket_name: str, data: bytes, destination_blob_name: str) -> None:
+        """Uploads bytes to a Google Cloud Storage bucket.
+
+        Args:
+            bucket_name: Name of the bucket.
+            data: Bytes to upload.
+            destination_blob_name: Name of the object in the bucket.
+        """
+        try:
+            bucket = self.client.bucket(bucket_name)
+            blob = bucket.blob(destination_blob_name)
+            blob.upload_from_string(data)
+        except GoogleCloudError as e:
+            raise e
 
     def generate_download_urls(self, bucket_name: str, prefix: str, expiration: int = 604800) -> List[str]:
         """Generates signed URLs for objects in a Google Cloud Storage bucket.
