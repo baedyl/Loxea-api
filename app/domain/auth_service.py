@@ -17,6 +17,7 @@ from app.data.user_repo import AbstractUserRepo
 def login(
     email: str,
     password: str,
+    secret_key: str,
     access_token_expiration_time: int,
     refresh_token_expiration_time: int,
     user_repo: AbstractUserRepo,
@@ -35,12 +36,19 @@ def login(
         )
 
     access_token = _create_token(
+        secret_key=secret_key,
         subject=user["external_reference"],
         expires_delta=timedelta(minutes=access_token_expiration_time),
     )
     refresh_token = _create_token(
+        secret_key=secret_key,
         subject=user["external_reference"],
         expires_delta=timedelta(minutes=refresh_token_expiration_time),
+    )
+    user_repo.save_tokens(
+        subject=user["external_key"],
+        access_token=access_token,
+        refresh_token=refresh_token
     )
 
     user["access_token"] = access_token
@@ -54,6 +62,7 @@ def sign_up(
     password: str,
     chassis_number: str,
     plate_number: str,
+    secret_key: str,
     access_token_expiration_time: int,
     refresh_token_expiration_time: int,
     user_repo: AbstractUserRepo,
@@ -69,12 +78,19 @@ def sign_up(
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     user = user_repo.create_user(email=email, name=name, password=str(hashed_password))
     access_token = _create_token(
+        secret_key=secret_key,
         subject=user["external_reference"],
         expires_delta=timedelta(minutes=access_token_expiration_time),
     )
     refresh_token = _create_token(
+        secret_key=secret_key,
         subject=user["external_reference"],
         expires_delta=timedelta(minutes=refresh_token_expiration_time),
+    )
+    user_repo.save_tokens(
+        subject=user["external_reference"],
+        access_token=access_token,
+        refresh_token=refresh_token
     )
 
     user["access_token"] = access_token
@@ -103,6 +119,11 @@ def refresh_user_token(
     access_token = _create_token(
         subject=user["external_reference"],
         expires_delta=timedelta(minutes=access_token_expiration_time),
+    )
+    user_repo.save_tokens(
+        subject=user["external_key"],
+        access_token=access_token,
+        refresh_token=refresh_token
     )
     return access_token
 
@@ -147,11 +168,11 @@ def reset_password(code: str, email: str, password: str, user_repo: AbstractUser
     user_repo.change_user_password(new_password=str(hashed_password), email=email)
 
 
-def _create_token(self, subject: str, expires_delta: timedelta) -> str:
+def _create_token(subject: str, secret_key: str, expires_delta: timedelta) -> str:
     to_encode: dict[str, Any] = {"sub": subject}
     expire = datetime.utcnow() + expires_delta
     to_encode["exp"] = expire
-    encoded_jwt = jwt.encode(to_encode, self._secret_key, algorithm="HS256")
+    encoded_jwt = jwt.encode(to_encode, secret_key, algorithm="HS256")
     return encoded_jwt
 
 
@@ -171,4 +192,4 @@ def _get_payload_from_token(token: str, secret_key: str) -> str | None:
 
 
 def _generate_reset_code() -> str:
-    return "".join([random.choice("1234567890") for i in range(5)])
+    return "".join([random.choice("1234567890") for _ in range(5)])

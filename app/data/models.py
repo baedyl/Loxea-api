@@ -44,6 +44,12 @@ class User(Base, table=True):
     assistances: List["Assistance"] = Relationship(back_populates="user")
 
 
+class Token(Base, table=True):
+    subject: str = Field(unique=True)
+    access_token: str
+    refresh_token: str
+
+
 class Feedback(Base, table=True):
     __tablename__ = "feedbacks"
 

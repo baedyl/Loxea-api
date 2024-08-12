@@ -4,7 +4,7 @@ from abc import abstractmethod
 from sqlmodel import Session
 from sqlmodel import select
 
-from app.data.models import IdentificationDetails
+from app.data.models import IdentificationDetails, Token
 from app.data.models import User
 
 
@@ -29,6 +29,12 @@ class AbstractUserRepo(ABC):
 
     @abstractmethod
     def change_user_password(self, new_password: str, email: str): ...
+
+    @abstractmethod
+    def get_access_token(self, access_token: str): ...
+
+    @abstractmethod
+    def save_tokens(self, subject: str, access_token: str, refresh_token: str): ...
 
 
 class UserRepo(AbstractUserRepo):
@@ -78,3 +84,24 @@ class UserRepo(AbstractUserRepo):
 
         self._session.add(record)
         self._session.commit()
+
+    def get_access_token(self, access_token: str) -> dict[str, str] | None:
+        record = self._session.exec(
+            select(Token).where(Token.access_token == access_token)
+        ).one_or_none()
+        return dict(record) if record else None
+
+    def save_tokens(self, subject: str, access_token: str, refresh_token: str):
+        record = self._session.exec(
+            select(Token).where(Token.subject == subject)
+        ).one_or_none()
+        if not record:
+            record = Token(subject=subject, access_token=access_token, refresh_token=refresh_token)
+        else:
+            record.access_token = access_token
+            record.refresh_token = refresh_token
+
+        self._session.add(record)
+        self._session.commit()
+
+

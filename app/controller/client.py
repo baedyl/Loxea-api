@@ -23,11 +23,13 @@ router = APIRouter(prefix="/api")
 
 @router.post("/login", response_model=LoginResponse)
 async def login(
-    schema: LoginSchema, user_repo: Annotated[AbstractUserRepo, Depends(get_user_repo)]
+    schema: LoginSchema,
+    user_repo: Annotated[AbstractUserRepo, Depends(get_user_repo)]
 ):
     user = auth_service.login(
         email=schema.email,
         password=schema.password,
+        secret_key=config.SECRET_KEY,
         access_token_expiration_time=config.ACCESS_TOKEN_EXPIRE_MINUTES,
         refresh_token_expiration_time=config.REFRESH_TOKEN_EXPIRE_MINUTES,
         user_repo=user_repo,
@@ -50,6 +52,7 @@ async def sign_up(
         password=schema.password,
         chassis_number=schema.chassis_number,
         plate_number=schema.plate_number,
+        secret_key=config.SECRET_KEY,
         access_token_expiration_time=config.ACCESS_TOKEN_EXPIRE_MINUTES,
         refresh_token_expiration_time=config.REFRESH_TOKEN_EXPIRE_MINUTES,
         user_repo=user_repo,
