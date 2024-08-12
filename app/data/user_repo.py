@@ -19,7 +19,7 @@ class AbstractUserRepo(ABC):
     ): ...
 
     @abstractmethod
-    def create_user(self, email: str, name: str, password: str): ...
+    def create_user(self, email: str, name: str, password: bytes): ...
 
     @abstractmethod
     def get_user_from_ref_key(self, ref_key: str): ...
@@ -31,10 +31,10 @@ class AbstractUserRepo(ABC):
     def change_user_password(self, new_password: str, email: str): ...
 
     @abstractmethod
-    def get_access_token(self, access_token: str): ...
+    def get_tokens_from_ref_key(self, ref_key: str): ...
 
     @abstractmethod
-    def save_tokens(self, subject: str, access_token: str, refresh_token: str): ...
+    def save_tokens(self, subject: str, access_token: bytes, refresh_token: bytes): ...
 
 
 class UserRepo(AbstractUserRepo):
@@ -57,7 +57,7 @@ class UserRepo(AbstractUserRepo):
         record = self._session.exec(query).one_or_none()
         return dict(record) if record else None
 
-    def create_user(self, email: str, name: str, password: str) -> dict[str, str]:
+    def create_user(self, email: str, name: str, password: bytes) -> dict[str, str]:
         user = User(email=email, name=name, password=password)
         self._session.add(user)
         self._session.commit()
@@ -85,13 +85,13 @@ class UserRepo(AbstractUserRepo):
         self._session.add(record)
         self._session.commit()
 
-    def get_access_token(self, access_token: str) -> dict[str, str] | None:
+    def get_tokens_from_ref_key(self, ref_key: str) -> dict[str, str] | None:
         record = self._session.exec(
-            select(Token).where(Token.access_token == access_token)
+            select(Token).where(Token.subject == ref_key)
         ).one_or_none()
         return dict(record) if record else None
 
-    def save_tokens(self, subject: str, access_token: str, refresh_token: str):
+    def save_tokens(self, subject: str, access_token: bytes, refresh_token: bytes):
         record = self._session.exec(
             select(Token).where(Token.subject == subject)
         ).one_or_none()

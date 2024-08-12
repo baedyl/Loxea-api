@@ -4,6 +4,7 @@ from functools import wraps
 from typing import TYPE_CHECKING
 from typing import Any
 
+import bcrypt
 from starlette.types import ASGIApp
 
 from app import HTTPErrorResponse, config
@@ -57,20 +58,21 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
 
                 else:
                     token = authorization_header.split(" ")[1]
-                    if not self._validate_token_against_db(access_token=token):
-                        return HTTPErrorResponse(
-                            title="Access Token Invalid",
-                            details="The provided access token is not valid",
-                            status_code=status.HTTP_401_UNAUTHORIZED,
-                        ).response()
-
                     payload = AuthorizationMiddleware.get_payload_from_token(token)
+
                     if not payload:
                         return HTTPErrorResponse(
                             title="Access Token Invalid",
                             details="The provided access token is not valid",
                             status_code=status.HTTP_401_UNAUTHORIZED,
                         ).response()
+                    if not self._validate_token_against_db(subject=payload, token=token):
+                        return HTTPErrorResponse(
+                            title="Access Token Invalid",
+                            details="The provided access token is not valid",
+                            status_code=status.HTTP_401_UNAUTHORIZED,
+                        ).response()
+
                     current_user = self._get_user_record_from_db(ref_key=payload)
                     request.state.current_user = current_user
                     if not current_user:
@@ -113,9 +115,11 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         record = self._repo.get_user_from_ref_key(ref_key=ref_key)
         return record if record else None
 
-    def _validate_token_against_db(self, access_token: str) -> bool:
-        record = self._repo.get_access_token(access_token=access_token)
-        return True if record else False
+    def _validate_token_against_db(self, subject: str, token: str) -> bool:
+        record = self._repo.get_tokens_from_ref_key(ref_key=subject)
+        if record:
+            return bcrypt.checkpw(token.encode("utf-8"), record["access_token"])
+        return False
 
 
 def require_authorization(function):

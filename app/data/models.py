@@ -34,7 +34,7 @@ class User(Base, table=True):
 
     name: str
     email: str = Field(index=True, unique=True)
-    password: str
+    password: bytes
     code: Optional[str] = None
     is_admin: Optional[bool] = False
     profile_image_url: Optional[str] = None
@@ -46,8 +46,8 @@ class User(Base, table=True):
 
 class Token(Base, table=True):
     subject: str = Field(unique=True)
-    access_token: str
-    refresh_token: str
+    access_token: bytes
+    refresh_token: bytes
 
 
 class Feedback(Base, table=True):

@@ -46,9 +46,9 @@ def login(
         expires_delta=timedelta(minutes=refresh_token_expiration_time),
     )
     user_repo.save_tokens(
-        subject=user["external_key"],
-        access_token=access_token,
-        refresh_token=refresh_token
+        subject=user["external_reference"],
+        access_token=bcrypt.hashpw(access_token.encode("utf-8"), bcrypt.gensalt()),
+        refresh_token=bcrypt.hashpw(refresh_token.encode("utf-8"), bcrypt.gensalt())
     )
 
     user["access_token"] = access_token
@@ -76,7 +76,7 @@ def sign_up(
         )
 
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    user = user_repo.create_user(email=email, name=name, password=str(hashed_password))
+    user = user_repo.create_user(email=email, name=name, password=hashed_password)
     access_token = _create_token(
         secret_key=secret_key,
         subject=user["external_reference"],
@@ -89,8 +89,8 @@ def sign_up(
     )
     user_repo.save_tokens(
         subject=user["external_reference"],
-        access_token=access_token,
-        refresh_token=refresh_token
+        access_token=bcrypt.hashpw(access_token.encode("utf-8"), bcrypt.gensalt()),
+        refresh_token=bcrypt.hashpw(refresh_token.encode("utf-8"), bcrypt.gensalt())
     )
 
     user["access_token"] = access_token
@@ -121,9 +121,9 @@ def refresh_user_token(
         expires_delta=timedelta(minutes=access_token_expiration_time),
     )
     user_repo.save_tokens(
-        subject=user["external_key"],
-        access_token=access_token,
-        refresh_token=refresh_token
+        subject=user["external_reference"],
+        access_token=bcrypt.hashpw(access_token.encode("utf-8"), bcrypt.gensalt()),
+        refresh_token=bcrypt.hashpw(refresh_token.encode("utf-8"), bcrypt.gensalt())
     )
     return access_token
 
