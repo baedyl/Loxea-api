@@ -35,11 +35,11 @@ def login(
         )
 
     access_token = _create_token(
-        subject=user["ref_key"],
+        subject=user["external_reference"],
         expires_delta=timedelta(minutes=access_token_expiration_time),
     )
     refresh_token = _create_token(
-        subject=user["ref_key"],
+        subject=user["external_reference"],
         expires_delta=timedelta(minutes=refresh_token_expiration_time),
     )
 
@@ -69,11 +69,11 @@ def sign_up(
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     user = user_repo.create_user(email=email, name=name, password=str(hashed_password))
     access_token = _create_token(
-        subject=user["ref_key"],
+        subject=user["external_reference"],
         expires_delta=timedelta(minutes=access_token_expiration_time),
     )
     refresh_token = _create_token(
-        subject=user["ref_key"],
+        subject=user["external_reference"],
         expires_delta=timedelta(minutes=refresh_token_expiration_time),
     )
 
