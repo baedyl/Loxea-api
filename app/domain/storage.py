@@ -32,7 +32,8 @@ class StorageBase(ABC):
             data: Bytes to upload.
             destination_blob_name: Name of the object in the bucket.
         """
-         
+        raise NotImplementedError("Subclasses must implement upload_bytes")
+    
     def generate_download_urls(self, bucket_name: str, prefix: str, expiration: int):
         """Generates signed URLs for objects in an object storage bucket.
 
