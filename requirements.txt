@@ -21,3 +21,4 @@ coverage==7.4.4
 types-python-jose
 psycopg2-binary==2.9.9
 bcrypt==4.2.0
+google-cloud-storage==2.18.2
