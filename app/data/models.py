@@ -1,6 +1,9 @@
+import enum
 from typing import List
 from typing import Optional
 
+from sqlmodel import Column
+from sqlmodel import Enum
 from sqlmodel import Field
 from sqlmodel import Relationship
 
@@ -19,6 +22,11 @@ class Faq(Base, table=True):
 
     question: str
     answer: str
+
+
+class IncidentType(enum.Enum):
+    Accident = "ACCIDENT"
+    Assistance = "ASSISTANCE"
 
 
 class IdentificationDetails(Base, table=True):
@@ -66,7 +74,9 @@ class Assistance(Base, table=True):
     gps_longitude: Optional[str] = None
     address_complement: Optional[str] = None
     comment: Optional[str] = None
-    type: str
+    incident_type: IncidentType = Field(
+        sa_column=Column(Enum(IncidentType))
+    )
     user: Optional[User] = Relationship(back_populates="assistances")
     images: List["AssistanceImage"] = Relationship(back_populates="assistance")
 

@@ -1,11 +1,12 @@
 from typing import Annotated
 
 from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import Depends, Request
 from starlette import status
 
 from app import config
-from app.controller.dependencies import get_user_repo
+from app.controller.dependencies import get_user_repo, get_assistance_repo, get_storage
+from app.data.assistance_repo import AbstractAssistanceRepo
 from app.data.schemas import LoginResponse
 from app.data.schemas import LoginSchema
 from app.data.schemas import RefreshTokenSchema
@@ -16,7 +17,9 @@ from app.data.schemas import SignUpResponse
 from app.data.schemas import SignUpSchema
 from app.data.schemas import ValidateResetCodeSchema
 from app.data.user_repo import AbstractUserRepo
-from app.domain import auth_service
+from app.domain import auth_service, assistance_service
+from app.domain.authorization import require_authorization
+from app.domain.storage import StorageBase
 
 router = APIRouter(prefix="/api")
 
@@ -112,15 +115,42 @@ async def reset_password(
     )
 
 
-@router.post("/request-assistance")
-async def request_assistance(schema: RequestAssistanceSchema): ...
+@router.post("/request-assistance", status_code=status.HTTP_201_CREATED)
+@require_authorization
+async def request_assistance(
+    request: Request,
+    schema: RequestAssistanceSchema,
+    assistance_repo: Annotated[AbstractAssistanceRepo, Depends(get_assistance_repo)],
+    storage: Annotated[StorageBase, Depends(get_storage)]
+):
+    assistance_service.request_assistance(
+        user_id=request.state.current_user,
+        latitude=schema.latitude,
+        longitude=schema.longitude,
+        address_complement=schema.address_complement,
+        comment=schema.comment,
+        images=None,
+        image_extensions=None,
+        type_=schema.type,
+        assistance_repo=assistance_repo,
+        storage=storage
+    )
+
+
+@router.post("/declare-accident")
+@require_authorization
+async def declare_accident(request: Request): ...
 
 
 @router.get("/emergency-contacts")
-async def get_emergency_contacts(): ...
+@require_authorization
+async def get_emergency_contacts(
+    assistance_repo: Annotated[AbstractAssistanceRepo, Depends(get_assistance_repo)]
+): ...
 
 
 @router.post("/submit-feedback")
+@require_authorization
 async def submit_feedback(): ...
 
 
