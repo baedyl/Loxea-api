@@ -28,6 +28,12 @@ class IncidentType(enum.Enum):
     Accident = "ACCIDENT"
     Assistance = "ASSISTANCE"
 
+class AssistanceStatusType(enum.Enum):
+    OPEN = "Ouvert"
+    IN_PROGRESS = "En cours"
+    CANCELLED = "Annulé"
+    RESOLVED = "Résolu"
+
 
 class IdentificationDetails(Base, table=True):
     __tablename__ = "identification_details"
@@ -77,6 +83,9 @@ class Assistance(Base, table=True):
     incident_type: IncidentType = Field(
         sa_column=Column(Enum(IncidentType))
     )
+    status: AssistanceStatusType = Field(
+        sa_column=Column(Enum(AssistanceStatusType))
+    ) 
     user: Optional[User] = Relationship(back_populates="assistances")
     images: List["AssistanceImage"] = Relationship(back_populates="assistance")
 
