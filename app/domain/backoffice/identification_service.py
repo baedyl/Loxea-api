@@ -1,10 +1,11 @@
 import csv
 from typing import List
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile, status 
 from sqlalchemy.orm import Session
 
 from app.data.models import IdentificationDetails
 from app.data.backoffice import schemas
+from app.config.response import HTTPException
 
 
 def process_identification_file(file: UploadFile, db: Session):
@@ -14,7 +15,11 @@ def process_identification_file(file: UploadFile, db: Session):
 
         expected_headers = {"chassis_number", "plate_number", "type"}
         if set(reader.fieldnames) != expected_headers:
-            raise HTTPException(status_code=400, detail="Invalid CSV headers")
+            raise HTTPException(
+                title="Invalid headers",
+                message=f"The headers in the file are invalid: Expected headers: ${expected_headers}",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
 
         records_to_insert = []
         for row in reader:
@@ -30,7 +35,11 @@ def process_identification_file(file: UploadFile, db: Session):
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
+        raise HTTPException(
+                title="Failed to process file",
+                message=f"Failed to process file: {str(e)}",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     finally:
         file.file.close()
 
