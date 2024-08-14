@@ -55,3 +55,7 @@ class RequestAssistanceSchema(BaseModel):
     address_complement: str
     comment: str
     type: IncidentType
+
+
+class SubmitFeedbackSchema(BaseModel):
+    message: str

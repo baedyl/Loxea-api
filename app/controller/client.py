@@ -7,7 +7,7 @@ from starlette import status
 from app import config
 from app.controller.dependencies import get_user_repo, get_assistance_repo, get_storage
 from app.data.assistance_repo import AbstractAssistanceRepo
-from app.data.schemas import LoginResponse
+from app.data.schemas import LoginResponse, SubmitFeedbackSchema
 from app.data.schemas import LoginSchema
 from app.data.schemas import RefreshTokenSchema
 from app.data.schemas import RequestAssistanceSchema
@@ -150,9 +150,18 @@ async def get_emergency_contacts(
     return assistance_service.get_emergency_contacts(assistance_repo=assistance_repo)
 
 
-@router.post("/submit-feedback")
+@router.post("/submit-feedback", status_code=status.HTTP_201_CREATED)
 @require_authorization
-async def submit_feedback(): ...
+async def submit_feedback(
+    schema: SubmitFeedbackSchema,
+    request: Request,
+    assistance_repo: Annotated[AbstractAssistanceRepo, Depends(get_assistance_repo)]
+):
+    return assistance_service.submit_feedback(
+        user_id=request.state.current_user["id"],
+        message=schema.message,
+        assistance_repo=assistance_repo
+    )
 
 
 @router.get("/faqs")
