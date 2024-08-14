@@ -146,7 +146,8 @@ async def declare_accident(request: Request): ...
 @require_authorization
 async def get_emergency_contacts(
     assistance_repo: Annotated[AbstractAssistanceRepo, Depends(get_assistance_repo)]
-): ...
+):
+    return assistance_service.get_emergency_contacts(assistance_repo=assistance_repo)
 
 
 @router.post("/submit-feedback")
