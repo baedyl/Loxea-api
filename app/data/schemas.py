@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.data.models import IncidentType
+
 
 class LoginSchema(BaseModel):
     email: str
@@ -52,3 +54,4 @@ class RequestAssistanceSchema(BaseModel):
     latitude: str
     address_complement: str
     comment: str
+    type: IncidentType

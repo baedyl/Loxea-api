@@ -1,6 +1,9 @@
+import enum
 from typing import List
 from typing import Optional
 
+from sqlmodel import Column
+from sqlmodel import Enum
 from sqlmodel import Field
 from sqlmodel import Relationship
 
@@ -21,6 +24,11 @@ class Faq(Base, table=True):
     answer: str
 
 
+class IncidentType(enum.Enum):
+    Accident = "ACCIDENT"
+    Assistance = "ASSISTANCE"
+
+
 class IdentificationDetails(Base, table=True):
     __tablename__ = "identification_details"
 
@@ -34,7 +42,7 @@ class User(Base, table=True):
 
     name: str
     email: str = Field(index=True, unique=True)
-    password: str
+    password: bytes
     code: Optional[str] = None
     is_admin: Optional[bool] = False
     profile_image_url: Optional[str] = None
@@ -42,6 +50,12 @@ class User(Base, table=True):
     plate_number: Optional[str] = None
     feedbacks: List["Feedback"] = Relationship(back_populates="user")
     assistances: List["Assistance"] = Relationship(back_populates="user")
+
+
+class Token(Base, table=True):
+    subject: str = Field(unique=True)
+    access_token: bytes
+    refresh_token: bytes
 
 
 class Feedback(Base, table=True):
@@ -60,7 +74,9 @@ class Assistance(Base, table=True):
     gps_longitude: Optional[str] = None
     address_complement: Optional[str] = None
     comment: Optional[str] = None
-    type: str
+    incident_type: IncidentType = Field(
+        sa_column=Column(Enum(IncidentType))
+    )
     user: Optional[User] = Relationship(back_populates="assistances")
     images: List["AssistanceImage"] = Relationship(back_populates="assistance")
 

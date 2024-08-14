@@ -1,18 +1,15 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Optional, List
 from google.cloud import storage
 from google.oauth2 import service_account
 from google.cloud.exceptions import GoogleCloudError
 
-
-from config.config import config
+from app import config
 
 
 class StorageBase(ABC):
 
-    def __init__(self):
-        pass 
-
+    @abstractmethod
     def upload_file(self, bucket_name: str, source_file_path: str, destination_blob_name: str):
         """Uploads a file to an object storage bucket.
 
@@ -21,9 +18,9 @@ class StorageBase(ABC):
             source_file_path: Path to the local file.
             destination_blob_name: Name of the object in the bucket.
         """
-        raise NotImplementedError("Subclasses must implement upload_file")
-    
+        ...
 
+    @abstractmethod
     def upload_bytes(self, bucket_name: str, data: bytes, destination_blob_name: str) -> None:
         """Uploads bytes to an objct storage bucket.
 
@@ -32,8 +29,9 @@ class StorageBase(ABC):
             data: Bytes to upload.
             destination_blob_name: Name of the object in the bucket.
         """
-        raise NotImplementedError("Subclasses must implement upload_bytes")
-    
+        ...
+
+    @abstractmethod
     def generate_download_urls(self, bucket_name: str, prefix: str, expiration: int):
         """Generates signed URLs for objects in an object storage bucket.
 
@@ -44,8 +42,9 @@ class StorageBase(ABC):
         Returns:
             A list of signed URLs.
         """
-        raise NotImplementedError("Subclasses must implement generate_download_urls")
+        ...
 
+    @abstractmethod
     def generate_download_url(self, bucket_name: str, blob_name: str, expiration: int) -> str:
         """Generates a signed URL for a single object in an object storage bucket.
 
@@ -57,10 +56,10 @@ class StorageBase(ABC):
         Returns:
             The generated signed URL.
         """
-        raise NotImplementedError("Subclasses must implement generate_download_url")
+        ...
     
 
-class GCPStorage:
+class GCPStorage(StorageBase):
     """A class for interacting with Google Cloud Storage."""
 
     def __init__(self, key_file_path: Optional[str] = None) -> None:
