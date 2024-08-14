@@ -39,3 +39,13 @@ def get_emergency_contacts(assistance_repo: AbstractAssistanceRepo) -> list[dict
         exclude = ["external_reference", "is_deleted", "created_at", "last_updated", "deleted_at"]
         return [{k: v for k, v in contact if k not in exclude} for contact in contacts]
     return contacts
+
+
+def submit_feedback(
+    user_id: int,
+    message: str,
+    assistance_repo: AbstractAssistanceRepo
+) -> dict[str, str]:
+    feedback = assistance_repo.create_feedback_record(user_id=user_id, message=message)
+    exclude = ["external_reference", "is_deleted", "created_at", "last_updated", "deleted_at"]
+    return {k: v for k, v in feedback.items() if k not in exclude}

@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlmodel import Session, select
 
-from app.data.models import IncidentType, Assistance, EmergencyContact
+from app.data.models import IncidentType, Assistance, EmergencyContact, Feedback
 
 
 class AbstractAssistanceRepo(ABC):
@@ -19,6 +19,9 @@ class AbstractAssistanceRepo(ABC):
         type_: IncidentType,
         images: list[bytes] | None
     ): ...
+
+    @abstractmethod
+    def create_feedback_record(self, user_id: int, message: str): ...
 
     @abstractmethod
     def get_emergency_contacts(self): ...
@@ -53,4 +56,16 @@ class AssistanceRepo(AbstractAssistanceRepo):
     def get_emergency_contacts(self) -> list[dict[str, str]]:
         records = self._session.exec(select(EmergencyContact)).all()
         return list(map(lambda record: dict(record), records)) if records else []
+
+    def create_feedback_record(self, user_id: int, message: str) -> dict[str, Any]:
+        record = Feedback(user_id=user_id, message=message)
+
+        self._session.add(record)
+        self._session.commit()
+        self._session.refresh(record)
+
+        return dict(record)
+
+
+
 
