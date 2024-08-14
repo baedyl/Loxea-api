@@ -36,11 +36,12 @@ def login(
             title="Incorrect password", message="Supplied password is incorrect"
         )
 
-    if is_admin and not user["is_admin"]:
-        raise HTTPException(
-            title="Unauthorized login",
-            message="The provided credentials don't have administrative privileges"
-        )
+    if is_admin:
+        if not user["is_admin"]:
+            raise HTTPException(
+                title="Unauthorized login",
+                message="The provided credentials don't have administrative privileges"
+            )
 
     access_token = _create_token(
         secret_key=secret_key,
@@ -73,9 +74,8 @@ def sign_up(
     access_token_expiration_time: int,
     refresh_token_expiration_time: int,
     user_repo: AbstractUserRepo,
-    is_admin: bool = False
 ):
-    if not is_admin and not user_repo.validate_identification_information(
+    if not user_repo.validate_identification_information(
         chassis_number=chassis_number, plate_number=plate_number
     ):
         raise HTTPException(
@@ -84,7 +84,7 @@ def sign_up(
         )
 
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    user = user_repo.create_user(email=email, name=name, password=hashed_password, is_admin=is_admin)
+    user = user_repo.create_user(email=email, name=name, password=hashed_password)
     access_token = _create_token(
         secret_key=secret_key,
         subject=user["external_reference"],
