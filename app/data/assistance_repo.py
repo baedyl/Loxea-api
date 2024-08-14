@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
-from app.data.models import IncidentType, Assistance
+from app.data.models import IncidentType, Assistance, EmergencyContact
 
 
 class AbstractAssistanceRepo(ABC):
@@ -19,6 +19,9 @@ class AbstractAssistanceRepo(ABC):
         type_: IncidentType,
         images: list[bytes] | None
     ): ...
+
+    @abstractmethod
+    def get_emergency_contacts(self): ...
 
 
 class AssistanceRepo(AbstractAssistanceRepo):
@@ -46,4 +49,8 @@ class AssistanceRepo(AbstractAssistanceRepo):
         self._session.refresh(record)
 
         return dict(record)
+
+    def get_emergency_contacts(self) -> list[dict[str, str]]:
+        records = self._session.exec(select(EmergencyContact)).all()
+        return list(map(lambda record: dict(record), records)) if records else []
 
