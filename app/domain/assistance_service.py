@@ -31,3 +31,11 @@ def request_assistance(
             ...
         # Call storage to store images and save record to db
     return record
+
+
+def get_emergency_contacts(assistance_repo: AbstractAssistanceRepo) -> list[dict[str, str]]:
+    contacts = assistance_repo.get_emergency_contacts()
+    if contacts:
+        exclude = ["external_reference", "is_deleted", "created_at", "last_updated", "deleted_at"]
+        return [{k: v for k, v in contact if k not in exclude} for contact in contacts]
+    return contacts
