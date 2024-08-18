@@ -1,55 +1,69 @@
 from datetime import datetime
+from typing import List
+from typing import Optional
+
 from pydantic import BaseModel
-from typing import Optional, List
 
-from app.data.models import IncidentType, AssistanceStatusType
-from app.data.schemas import LoginSchema as BaseLoginSchema
+from app.data.models import AssistanceStatusType
+from app.data.models import IncidentType
 from app.data.schemas import LoginResponse as BaseLoginResponse
+from app.data.schemas import LoginSchema as BaseLoginSchema
 from app.data.schemas import RefreshTokenSchema as BaseRefreshTokenSchema
+from app.data.schemas import \
+    RequestPasswordResetSchema as BaseRequestPasswordResetSchema
 from app.data.schemas import ResetPasswordSchema as BaseResetPasswordSchema
-from app.data.schemas import RequestPasswordResetSchema as BaseRequestPasswordResetSchema
-from app.data.schemas import ValidateResetCodeSchema as BaseValidateResetCodeSchema
-
+from app.data.schemas import \
+    ValidateResetCodeSchema as BaseValidateResetCodeSchema
 
 # ======= User Schemas =========
 
+
 class LoginSchema(BaseLoginSchema):
-    pass 
+    pass
+
 
 class LoginResponse(BaseLoginResponse):
-    pass 
+    pass
+
 
 class CreateUserSchema(BaseModel):
     name: str
-    email: str 
-    password: str 
+    email: str
+    password: str
+
 
 class UpdateUserSchema(BaseModel):
-    name: str 
+    name: str
     email: str
 
+
 class CreateUserResponse(BaseModel):
-    id: int 
-    name: str 
-    email: str 
+    id: int
+    name: str
+    email: str
+
 
 class RefreshTokenSchema(BaseRefreshTokenSchema):
     pass
 
+
 class RequestPasswordResetSchema(BaseRequestPasswordResetSchema):
-    pass 
+    pass
+
 
 class ValidateResetCodeSchema(BaseValidateResetCodeSchema):
     pass
 
+
 class ResetPasswordSchema(BaseResetPasswordSchema):
-    pass 
+    pass
+
 
 class UserDetailSchema(BaseModel):
-    id: int 
+    id: int
     external_reference: str
-    name: str 
-    email: str 
+    name: str
+    email: str
     is_admin: bool
     profile_image_url: Optional[str] = None
     chassis_number: Optional[str] = None
@@ -64,11 +78,12 @@ class UserListSchema(BaseModel):
 
 # ========== Identification Schemas =======
 
+
 class IdentificationSchema(BaseModel):
-    id: int 
+    id: int
     chassis_number: str
     plate_number: str
-    type: str 
+    type: str
     created_at: datetime
     last_updated: datetime
 
@@ -80,17 +95,20 @@ class IdentificationListSchema(BaseModel):
 class UpdateIdentificationSchema(BaseModel):
     id: int
     chassis_number: str
-    plate_number: str 
-    type: str 
+    plate_number: str
+    type: str
+
 
 class IdentificationFileUploadResponseSchema(BaseModel):
     processed_records: Optional[int] = 0
-    
+
 
 # ========== Assistance Schema ======
 
+
 class AssistanceImageSchema(BaseModel):
     image_url: str
+
 
 class AssistanceSchema(BaseModel):
     id: int
@@ -101,12 +119,14 @@ class AssistanceSchema(BaseModel):
     incident_type: IncidentType
     user: UserDetailSchema
     images: List[AssistanceImageSchema]
-    status: AssistanceStatusType 
+    status: AssistanceStatusType
     created_at: datetime
     last_updated: datetime
 
-class UpdateAssistanceSchema(BaseModel): 
+
+class UpdateAssistanceSchema(BaseModel):
     status: AssistanceStatusType
+
 
 class AssistanceListSchema(BaseModel):
     assistance: List[AssistanceSchema]
@@ -114,9 +134,9 @@ class AssistanceListSchema(BaseModel):
 
 # ===== Feedback Schemas ========
 class FeedbackSchema(BaseModel):
-    id: int 
+    id: int
     user: UserDetailSchema
-    message: str 
+    message: str
     created_at: datetime
     last_updated: datetime
 
@@ -127,19 +147,23 @@ class FeedbackListSchema(BaseModel):
 
 # ===== Contact Schemas ========
 
+
 class CreateEmmergencyContactSchema(BaseModel):
     name: str
-    number: str 
+    number: str
+
 
 class EmmergencyContactSchema(BaseModel):
-    id: int 
+    id: int
     name: str
-    number: str 
+    number: str
     created_at: datetime
     last_updated: datetime
 
+
 class EmmergencyContactListSchema(BaseModel):
     contacts: List[EmmergencyContactSchema]
+
 
 class UpdateEmmergencyContactSchema(BaseModel):
     name: str
@@ -148,26 +172,25 @@ class UpdateEmmergencyContactSchema(BaseModel):
 
 # ======= FAQ Schemas =======
 
+
 class FAQSchema(BaseModel):
     id: int
-    question: str 
-    answer: str 
+    question: str
+    answer: str
     created_at: datetime
     last_updated: datetime
+
 
 class FAQListSchema(BaseModel):
     faqs: List[FAQSchema]
 
+
 class CreateFAQSchema(BaseModel):
-    question: str 
-    answer: str 
+    question: str
+    answer: str
+
 
 class UpdateFAQSchema(BaseModel):
-    id: int 
+    id: int
     question: str
-    answer: str 
-
-
-
-
-
+    answer: str

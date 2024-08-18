@@ -28,6 +28,7 @@ class IncidentType(enum.Enum):
     Accident = "ACCIDENT"
     Assistance = "ASSISTANCE"
 
+
 class AssistanceStatusType(enum.Enum):
     OPEN = "Ouvert"
     IN_PROGRESS = "En cours"
@@ -80,12 +81,8 @@ class Assistance(Base, table=True):
     gps_longitude: Optional[str] = None
     address_complement: Optional[str] = None
     comment: Optional[str] = None
-    incident_type: IncidentType = Field(
-        sa_column=Column(Enum(IncidentType))
-    )
-    status: AssistanceStatusType = Field(
-        sa_column=Column(Enum(AssistanceStatusType))
-    ) 
+    incident_type: IncidentType = Field(sa_column=Column(Enum(IncidentType)))
+    status: AssistanceStatusType = Field(sa_column=Column(Enum(AssistanceStatusType)))
     user: Optional[User] = Relationship(back_populates="assistances")
     images: List["AssistanceImage"] = Relationship(back_populates="assistance")
 
