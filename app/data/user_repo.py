@@ -19,7 +19,7 @@ class AbstractUserRepo(ABC):
     ): ...
 
     @abstractmethod
-    def create_user(self, email: str, name: str, password: bytes): ...
+    def create_user(self, email: str, name: str, password: bytes, is_admin: bool = False): ...
 
     @abstractmethod
     def get_user_from_ref_key(self, ref_key: str): ...
@@ -57,8 +57,8 @@ class UserRepo(AbstractUserRepo):
         record = self._session.exec(query).one_or_none()
         return dict(record) if record else None
 
-    def create_user(self, email: str, name: str, password: bytes) -> dict[str, str]:
-        user = User(email=email, name=name, password=password)
+    def create_user(self, email: str, name: str, password: bytes, is_admin: bool = False) -> dict[str, str]:
+        user = User(email=email, name=name, password=password, is_admin=is_admin)
         self._session.add(user)
         self._session.commit()
         self._session.refresh(user)

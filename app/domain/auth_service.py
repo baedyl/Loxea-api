@@ -21,6 +21,7 @@ def login(
     access_token_expiration_time: int,
     refresh_token_expiration_time: int,
     user_repo: AbstractUserRepo,
+    is_admin: bool = False
 ) -> dict[str, str]:
     user = user_repo.get_user_from_email(email=email)
 
@@ -34,6 +35,13 @@ def login(
         raise HTTPException(
             title="Incorrect password", message="Supplied password is incorrect"
         )
+
+    if is_admin:
+        if not user["is_admin"]:
+            raise HTTPException(
+                title="Unauthorized login",
+                message="The provided credentials don't have administrative privileges"
+            )
 
     access_token = _create_token(
         secret_key=secret_key,
