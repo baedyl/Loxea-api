@@ -19,6 +19,6 @@ mypy==1.9.0
 pre-commit
 coverage==7.4.4
 types-python-jose
-psycopg2-binary==2.9.9
+psycopg2-binary
 bcrypt==4.2.0
 google-cloud-storage==2.18.2
